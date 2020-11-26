@@ -2,22 +2,23 @@
   <v-container>
     <v-container class="pa-0" fluid>
       <span class="">分野</span>
-      <v-col cols="12" class="pa-0">
-        <v-btn-toggle>
-          <v-radio-group
-            class="mt-n1"
-            row
-            :style="{ background: $vuetify.theme.themes[theme].background }"
-            v-model="type"
-          >
-            <v-radio
+      <v-col cols="12" class="pa-0 mt-2">
+<!--        <v-btn-toggle-->
+<!--            class="mt-n1"-->
+
+<!--            :style="{ background: $vuetify.theme.themes[theme].background }"-->
+<!--          >-->
+        <v-row>
+            <v-checkbox
               v-for="volunteerType in volunteerType"
               :label="volunteerType.value"
               :value="volunteerType.value"
+              v-model="SelectedVolunteerType"
               :key="volunteerType.id"
-            ></v-radio>
-          </v-radio-group>
-        </v-btn-toggle>
+              class="mx-2 my-n3"
+            ></v-checkbox>
+        </v-row>
+<!--        </v-btn-toggle>-->
       </v-col>
     </v-container>
     <!--    </template>-->
@@ -25,7 +26,7 @@
     <v-text-field
       label="新聞名、朝夕、日付"
       placeholder="ay940324"
-      class="pa-0 my-n1"
+      class="pa-0 mb-n1"
       outlined
       v-model="dateDATA"
     ></v-text-field>
@@ -100,6 +101,7 @@ export default {
     keywords: "",
     type: false,
     isOsaka: false,
+    SelectedVolunteerType:[],
 
     snackbar: false,
     copyErr: false,
@@ -135,7 +137,7 @@ export default {
 
 
     PubIDList:"AYMSNOFK",
-    MorningOrEveningList:"AY",
+    MorningOrEveningList:"AYN",
     DateStrRegExp:"(\\d{6}|\\d{8})",
 
     history:[],
@@ -146,11 +148,12 @@ export default {
       return this.$vuetify.theme.dark ? "dark" : "light";
     },
     InputCheckRegExp(){
+      // console.log(`^[${this.PubIDList}][${this.MorningOrEveningList}]${this.DateStrRegExp}$`)
       return new RegExp(`^[${this.PubIDList}][${this.MorningOrEveningList}]${this.DateStrRegExp}$`)
     },
     copy() {
       let dateDATA_Normalized = this.Normalize(this.dateDATA)
-      if(!this.InputCheckRegExp.test(dateDATA_Normalized) || this.type === false){
+      if(!this.InputCheckRegExp.test(dateDATA_Normalized) || this.SelectedVolunteerType.length === 0){
         return undefined;
       }
 
@@ -185,6 +188,7 @@ export default {
             return "朝刊"
           case "Y":
             return "夕刊"
+          case "N":
           default:
             return ""
         }
@@ -220,7 +224,7 @@ export default {
 
       let isOsakaArticle = (this.isOsaka)? "<大阪ボランティア協会>" : ""
       //19940320福祉【読売】朝刊「障害者が働ける場を 福祉の会 明日設立」社会福祉・自立推進研究会、堀内進一、清水哲.pdf
-      return `${date}${this.type}${Publisher}${MorningOrEvening}「${this.title}」${this.keywords}${isOsakaArticle}`;
+      return `${date}${this.SelectedVolunteerType.join(" ")}${Publisher}${MorningOrEvening}「${this.title}」${this.keywords}${isOsakaArticle}`;
     },
   },
 
@@ -229,15 +233,14 @@ export default {
       this.dateDATA = ""
       this.title = ""
       this.keywords = ""
-      this.type =  false
+      this.SelectedVolunteerType =  []
       this.isOsaka = false
     },
 
     CheckStr(){
      if(!this.InputCheckRegExp.test(this.Normalize(this.dateDATA))){
        this.inputErr = true
-     }
-     if(this.type === false){
+     }else if(this.SelectedVolunteerType.length === 0){
        this.typeNoInput = true
      }
     },
